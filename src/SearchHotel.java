@@ -47,23 +47,23 @@ public class SearchHotel extends HttpServlet {
 	
 	private boolean checkSession(HttpServletRequest request,PrintWriter out ){
 		HttpSession session = request.getSession(true);
-		out.println(session.getId());
+		//out.println(session.getId());
 		long now = System.currentTimeMillis();
 		long lastAcc = session.getLastAccessedTime();
 		if(banSession.contains(session.getId())){
-			if(now-(long)session.getAttribute("banTime")>=60*1000){
+			if(now-(long)session.getAttribute("banTime")>=5*60*1000){
 				banSession.remove(session.getId());
 				callNum = 0;
 			}else{
-				out.println(now-(long)session.getAttribute("banTime"));
+				//out.println(now-(long)session.getAttribute("banTime"));
 				out.println("This session is ban");
 				return false;
 			}
 		}		
-		out.println(now-lastAcc);
+		//out.println(now-lastAcc);
 		if (session.isNew() || now - lastAcc >= 10*1000) {
 			callNum = 0;
-			out.println("Reset");
+			//out.println("Reset");
 		}
 		callNum += 1;
 		out.println("Access Time : "+callNum);
