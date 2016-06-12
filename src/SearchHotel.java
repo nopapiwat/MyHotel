@@ -24,8 +24,8 @@ public class SearchHotel extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
 	Set<String> banSession;
-	List<Hotel> data;
-	private Dao dao;
+	Search search;
+	
 	int rateLimit = 5;
 	int callNum;
 
@@ -34,19 +34,18 @@ public class SearchHotel extends HttpServlet {
 			throws ServletException, IOException {
 		response.setContentType("text/plain");
 		PrintWriter out = response.getWriter();
-		
-		if(!checkSession(request,out)){
+		HttpSession session = request.getSession(true);
+		if(!checkSession(session,out)){
 			return;
 		}
 		
 		String city = request.getParameter("city");
 		String order = request.getParameter("order");
 		
-		out.println(search(city, order));
+		out.println(search.search(city, order));
 	}
 	
-	private boolean checkSession(HttpServletRequest request,PrintWriter out ){
-		HttpSession session = request.getSession(true);
+	private boolean checkSession(HttpSession session,PrintWriter out ){
 		//out.println(session.getId());
 		long now = System.currentTimeMillis();
 		long lastAcc = session.getLastAccessedTime();
@@ -75,35 +74,12 @@ public class SearchHotel extends HttpServlet {
 		}
 		return true;
 	}
-	
-	private String search(String city, String order){
-		ArrayList<Hotel> hotels = new ArrayList<Hotel>();
-		String res = "";
-		for(int i = 0; i < data.size(); i++){			
-			if(city == null || data.get(i).getCity().equals(city)){
-				hotels.add(data.get(i));				
-			}
-		}
-		Collections.sort(hotels);
-		if(order != null && order.equals("DESC")){
-			Collections.reverse(hotels);
-		}
-		for(int i = 0; i < hotels.size(); i++){			
-			res += hotels.get(i).toString()+"\n";
-		}
-		return res;
-	}
 
 	@Override
 	public void init() throws ServletException {
 		banSession = new TreeSet<String>();
-		dao = new Dao();
-		try {
-			data = dao.getData();
-		} catch (Exception e) {
-			getServletContext().log("An exception occurred in SearchHotel", e);
-			throw new ServletException("An exception occurred in SearchHotel" + e.getMessage());
-		}
+		search = new Search();
+		
 	}
 
 	public void destroy() {
